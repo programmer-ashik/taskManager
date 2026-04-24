@@ -26,10 +26,12 @@ const taskSchema = new Schema(
       enum: ["low", "medium", "high"],
       default: "medium",
     },
-    assignedTo: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
+    assignedTo: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     deadline: {
       type: Date,
       required: true,
@@ -38,5 +40,5 @@ const taskSchema = new Schema(
   { timestamps: true }
 );
 taskSchema.index({ owner: 1, status: 1 });
-const task = model("Task", taskSchema);
+const Task = model("Task", taskSchema);
 export default task;
