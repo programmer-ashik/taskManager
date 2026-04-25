@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 const taskSchema = new Schema(
   {
     title: {
@@ -9,6 +9,7 @@ const taskSchema = new Schema(
     },
     description: {
       type: String,
+      required: true,
       trim: true,
     },
     status: {
@@ -40,5 +41,6 @@ const taskSchema = new Schema(
   { timestamps: true }
 );
 taskSchema.index({ owner: 1, status: 1 });
+taskSchema.plugin(aggregatePaginate);
 const Task = model("Task", taskSchema);
-export default task;
+export default Task;
