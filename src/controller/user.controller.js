@@ -1,8 +1,8 @@
-import User from "../models/user.model";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
-import { generateAccessAndRefreshToken } from "../utils/generateAccessAndRefreshtoken";
+import User from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { generateAccessAndRefreshToken } from "../utils/generateAccessAndRefreshtoken.js";
 import jwt from "jsonwebtoken";
 
 const register = asyncHandler(async (req, res) => {
@@ -197,4 +197,12 @@ const getAllUsers = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, users, "Users fetched successfully"));
 });
 
-export { register, login, logout, refreshToken, resetPassword };
+export {
+  register,
+  login,
+  logout,
+  refreshToken,
+  resetPassword,
+  updateRole,
+  getAllUsers,
+};

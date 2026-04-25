@@ -1,8 +1,8 @@
-import { isValidObjectId } from "mongoose";
-import Task from "../models/task.model";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
+import mongoose, { isValidObjectId } from "mongoose";
+import Task from "../models/task.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const getAllTask = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
@@ -270,5 +270,66 @@ const searchTask = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, result, "Search successfull"));
 });
+const getTaskById = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+  const userId = req.user?._id;
+  const userRole = req.user?.role;
 
-export { dashTaskDashboard, getAllTask, addTask, deleteTask, searchTask };
+  if (!isValidObjectId(taskId)) {
+    throw new ApiError(400, "Invalid Task ID");
+  }
+
+  const task = await Task.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(taskId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [{ $project: { username: 1, avatar: 1 } }],
+      },
+    },
+    { $addFields: { owner: { $first: "$owner" } } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "assignedTo",
+        foreignField: "_id",
+        as: "assignedTo",
+        pipeline: [{ $project: { username: 1, avatar: 1 } }],
+      },
+    },
+    { $addFields: { assignedTo: { $first: "$assignedTo" } } },
+  ]);
+
+  if (!task?.length) {
+    throw new ApiError(404, "Task not found");
+  }
+
+  const foundTask = task[0];
+  const isOwner = foundTask.owner?._id.equals(userId);
+  const isAssigned = foundTask.assignedTo?._id.equals(userId);
+
+  if (!isOwner && !isAssigned && userRole !== "admin") {
+    throw new ApiError(403, "You are not authorized to view this task");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, foundTask, "Task fetched successfully"));
+});
+
+export {
+  dashTaskDashboard,
+  getAllTask,
+  statusUpdate,
+  addTask,
+  deleteTask,
+  searchTask,
+  getTaskById
+};

@@ -15,4 +15,9 @@ app.use(cookieParser());
 app.use(express.json({ limit: "16kb" }));
 // for parsing application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+// add all router
+import userRoutes from "./routes/user.route.js";
+import taskRoute from "./routes/task.route.js";
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/tasks", taskRoute);
 export default app;

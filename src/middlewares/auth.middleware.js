@@ -22,3 +22,4 @@ const jwtVerify = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, "Unauthorized");
   }
 });
+export { jwtVerify };
